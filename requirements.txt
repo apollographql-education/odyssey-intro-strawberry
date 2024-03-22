@@ -1,0 +1,3 @@
+strawberry-graphql>=0.213.0
+fastapi
+uvicorn

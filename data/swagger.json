@@ -1,0 +1,4598 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Mock Spotify REST API",
+    "description": "Based on the Spotify Web API, this is a version that takes a small slice of that Web API and returns hard-coded mock data.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://spotify-demo-api-fe224840a08c.herokuapp.com/v1"
+    }
+  ],
+  "paths": {
+    "/browse/featured-playlists": {
+      "get": {
+        "description": "Get a list of Spotify featured playlists (shown, for example, on a Spotify player's 'Browse' tab).\n",
+        "tags": ["Playlists"],
+        "operationId": "get-featured-playlists",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Spotify.Object.FeaturedPlaylists"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/playlists/{playlist_id}": {
+      "get": {
+        "description": "Get a playlist owned by a Spotify user.\n",
+        "operationId": "get-playlist",
+        "tags": ["Playlists"],
+        "parameters": [
+          {
+            "name": "playlist_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Spotify.Object.Playlist"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/playlists/{playlist_id}/tracks": {
+      "get": {
+        "description": "Get full details of the items of a playlist owned by a Spotify user.\n",
+        "operationId": "get-playlists-tracks",
+        "tags": ["Playlists"],
+        "parameters": [
+          {
+            "name": "playlist_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.PlaylistTrack>"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "post": {
+        "description": "Add one or more items to a user's playlist.\n",
+        "operationId": "add-tracks-to-playlist",
+        "tags": ["Playlists"],
+        "parameters": [
+          {
+            "name": "playlist_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "position",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "title": "Position (append by default)",
+              "description": "The position to insert the items, a zero-based index. For example, to insert the items in the first position: `position=0`; to insert the items in the third position: `position=2`. If omitted, the items will be appended to the playlist. Items are added in the order they are listed in the query string or request body.\n",
+              "example": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "uris",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "title": "Spotify Track URIs",
+              "description": "A comma-separated list of [Spotify URIs](/documentation/web-api/concepts/spotify-uris-ids) to add, can be track or episode URIs. For example:<br/>`uris=spotify:track:4iV5W9uYEdYUVa79Axb7Rh, spotify:track:1301WleyT98MSxVHPZCA6M, spotify:episode:512ojhOuo1ktJprKbVcKyQ`<br/>A maximum of 100 items can be added in one request. <br/>\n_**Note**: it is likely that passing a large number of item URIs as a query parameter will exceed the maximum length of the request URI. When adding a large number of items, it is recommended to pass them in the request body, see below._\n",
+              "example": "spotify:track:4iV5W9uYEdYUVa79Axb7Rh,spotify:track:1301WleyT98MSxVHPZCA6M",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Spotify.Object.Snapshot"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/search": {
+      "get": {
+        "tags": ["Playlists"],
+        "operationId": "search",
+        "summary": "Search for Item\n",
+        "description": "Get Spotify catalog information about albums, artists, playlists, tracks, shows, episodes or audiobooks\nthat match a keyword string.<br />\n**Note: Audiobooks are only available for the US, UK, Ireland, New Zealand and Australia markets.**\n",
+        "parameters": [
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "title": "Query",
+              "description": "Your search query.\n\nYou can narrow down your search using field filters. The available filters are `album`, `artist`, `track`, `year`, `upc`, `tag:hipster`, `tag:new`, `isrc`, and `genre`. Each field filter only applies to certain result types.\n\nThe `artist` and `year` filters can be used while searching albums, artists and tracks. You can filter on a single `year` or a range (e.g. 1955-1960).<br />\nThe `album` filter can be used while searching albums and tracks.<br />\nThe `genre` filter can be used while searching artists and tracks.<br />\nThe `isrc` and `track` filters can be used while searching tracks.<br />\nThe `upc`, `tag:new` and `tag:hipster` filters can only be used while searching albums. The `tag:new` filter will return albums released in the past two weeks and `tag:hipster` can be used to return only albums with the lowest 10% popularity.<br />\n",
+              "example": "cooking",
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "title": "Item type",
+              "description": "A comma-separated list of item types to search across. Search results include hits\nfrom all the specified item types. For example: `q=abacab&type=album,track` returns\nboth albums and tracks matching \"abacab\".\n",
+              "items": {
+                "type": "string",
+                "title": "searchType",
+                "enum": [
+                  "album",
+                  "artist",
+                  "playlist",
+                  "track",
+                  "show",
+                  "episode",
+                  "audiobook"
+                ]
+              },
+              "type": "array"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "nullable": true,
+            "in": "query",
+            "schema": {
+              "title": "Limit",
+              "description": "The maximum number of results to return in each item type.\n",
+              "default": 20,
+              "example": 10,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "nullable": true,
+            "in": "query",
+            "schema": {
+              "title": "Offset",
+              "description": "The index of the first result to return. Use\nwith limit to get the next page of search results.\n",
+              "default": 0,
+              "minimum": 0,
+              "maximum": 1000,
+              "example": 5,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "include_external",
+            "required": false,
+            "nullable": true,
+            "in": "query",
+            "schema": {
+              "title": "Include External",
+              "description": "If `include_external=audio` is specified it signals that the client can play externally hosted audio content, and marks\nthe content as playable in the response. By default externally hosted audio content is marked as unplayable in the response.\n",
+              "type": "string",
+              "enum": ["audio"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Spotify.Object.SearchResults"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Spotify.HTTPMethod": {
+        "type": "string",
+        "enum": ["DELETE", "GET", "POST", "PUT"]
+      },
+      "Spotify.Error.AuthenticationError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "error_description": {
+            "type": "string"
+          }
+        },
+        "required": ["error", "error_description"],
+        "additionalProperties": false
+      },
+      "Spotify.Error.RegularError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "number"
+              },
+              "message": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "required": ["status", "message"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["error"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Actions": {
+        "type": "object",
+        "properties": {
+          "disallows": {
+            "$ref": "#/components/schemas/Spotify.Object.Disallows"
+          }
+        },
+        "required": ["disallows"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Disallows": {
+        "type": "object",
+        "properties": {
+          "interrupting_playback": {
+            "type": "boolean"
+          },
+          "pausing": {
+            "type": "boolean"
+          },
+          "resuming": {
+            "type": "boolean"
+          },
+          "seeking": {
+            "type": "boolean"
+          },
+          "skipping_next": {
+            "type": "boolean"
+          },
+          "skipping_prev": {
+            "type": "boolean"
+          },
+          "toggling_repeat_context": {
+            "type": "boolean"
+          },
+          "toggling_shuffle": {
+            "type": "boolean"
+          },
+          "toggling_repeat_track": {
+            "type": "boolean"
+          },
+          "transferring_playback": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Spotify.Object.Album": {
+        "type": "object",
+        "properties": {
+          "album_type": {
+            "$ref": "#/components/schemas/Spotify.Object.AlbumType"
+          },
+          "artists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.ArtistSimplified"
+            }
+          },
+          "available_markets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.CountryCode"
+            }
+          },
+          "copyrights": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Copyright"
+            }
+          },
+          "external_ids": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalId"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Image"
+            }
+          },
+          "label": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "popularity": {
+            "type": "number"
+          },
+          "release_date": {
+            "type": "string"
+          },
+          "release_date_precision": {
+            "$ref": "#/components/schemas/Spotify.Object.ReleaseDatePrecision"
+          },
+          "total_tracks": {
+            "type": "number"
+          },
+          "tracks": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.TrackSimplified>"
+          },
+          "type": {
+            "type": "string",
+            "const": "album"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "album_type",
+          "artists",
+          "available_markets",
+          "copyrights",
+          "external_ids",
+          "external_urls",
+          "genres",
+          "href",
+          "id",
+          "images",
+          "label",
+          "name",
+          "popularity",
+          "release_date",
+          "release_date_precision",
+          "total_tracks",
+          "tracks",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.AlbumType": {
+        "type": "string",
+        "enum": ["album", "compilation", "single"]
+      },
+      "Spotify.Object.ArtistSimplified": {
+        "type": "object",
+        "properties": {
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "const": "artist"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": ["external_urls", "href", "id", "name", "type", "uri"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.ExternalUrl": {
+        "type": "object",
+        "properties": {
+          "spotify": {
+            "type": "string"
+          }
+        },
+        "required": ["spotify"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.CountryCode": {
+        "type": "string"
+      },
+      "Spotify.Object.Copyright": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Spotify.Object.CopyrightType"
+          }
+        },
+        "required": ["text", "type"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.CopyrightType": {
+        "type": "string",
+        "enum": ["C", "P"]
+      },
+      "Spotify.Object.ExternalId": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "Spotify.Object.Image": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "height": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          }
+        },
+        "required": ["url", "height", "width"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.ReleaseDatePrecision": {
+        "type": "string",
+        "enum": ["day", "month", "year"]
+      },
+      "Spotify.Object.Paginated<Spotify.Object.TrackSimplified>": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.TrackSimplified"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "offset": {
+            "type": "number"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "href",
+          "limit",
+          "next",
+          "offset",
+          "previous",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.TrackSimplified": {
+        "type": "object",
+        "properties": {
+          "artists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.ArtistSimplified"
+            }
+          },
+          "available_markets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.CountryCode"
+            }
+          },
+          "disc_number": {
+            "type": "number"
+          },
+          "duration_ms": {
+            "type": "number"
+          },
+          "explicit": {
+            "type": "boolean"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "is_local": {
+            "type": "boolean"
+          },
+          "is_playable": {
+            "type": "boolean"
+          },
+          "linked_from": {
+            "$ref": "#/components/schemas/Spotify.Object.TrackSimplifiedLinkedFrom"
+          },
+          "restrictions": {
+            "$ref": "#/components/schemas/Spotify.Object.Restrictions"
+          },
+          "name": {
+            "type": "string"
+          },
+          "preview_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "track_number": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "const": "track"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "artists",
+          "available_markets",
+          "disc_number",
+          "duration_ms",
+          "explicit",
+          "external_urls",
+          "href",
+          "id",
+          "is_local",
+          "name",
+          "preview_url",
+          "track_number",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.TrackSimplifiedLinkedFrom": {
+        "type": "object",
+        "properties": {
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "const": "track"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": ["external_urls", "href", "id", "type", "uri"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Restrictions": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": ["market", "product", "explicit"]
+          }
+        },
+        "required": ["reason"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.AlbumSimplified": {
+        "type": "object",
+        "properties": {
+          "album_type": {
+            "$ref": "#/components/schemas/Spotify.Object.AlbumType"
+          },
+          "artists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.ArtistSimplified"
+            }
+          },
+          "available_markets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.CountryCode"
+            }
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Image"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "release_date": {
+            "type": "string"
+          },
+          "release_date_precision": {
+            "$ref": "#/components/schemas/Spotify.Object.ReleaseDatePrecision"
+          },
+          "restrictions": {
+            "$ref": "#/components/schemas/Spotify.Object.Restrictions"
+          },
+          "total_tracks": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "const": "album"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "album_type",
+          "artists",
+          "available_markets",
+          "external_urls",
+          "href",
+          "id",
+          "images",
+          "name",
+          "release_date",
+          "release_date_precision",
+          "total_tracks",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.AlbumGroup": {
+        "type": "string",
+        "enum": ["album", "appears_on", "compilation", "single"]
+      },
+      "Spotify.Object.Artist": {
+        "type": "object",
+        "properties": {
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "followers": {
+            "$ref": "#/components/schemas/Spotify.Object.Followers"
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Image"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "popularity": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "const": "artist"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "external_urls",
+          "followers",
+          "genres",
+          "href",
+          "id",
+          "images",
+          "name",
+          "popularity",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Followers": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": ["total"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.ArtistTopTracks": {
+        "type": "object",
+        "properties": {
+          "tracks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Track"
+            }
+          }
+        },
+        "required": ["tracks"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Track": {
+        "type": "object",
+        "properties": {
+          "album": {
+            "$ref": "#/components/schemas/Spotify.Object.AlbumSimplified"
+          },
+          "artists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.ArtistSimplified"
+            }
+          },
+          "available_markets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.CountryCode"
+            }
+          },
+          "disc_number": {
+            "type": "number"
+          },
+          "duration_ms": {
+            "type": "number"
+          },
+          "explicit": {
+            "type": "boolean"
+          },
+          "external_ids": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalId"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "is_local": {
+            "type": "boolean"
+          },
+          "is_playable": {
+            "type": "boolean"
+          },
+          "linked_from": {
+            "$ref": "#/components/schemas/Spotify.Object.Track"
+          },
+          "name": {
+            "type": "string"
+          },
+          "popularity": {
+            "type": "number"
+          },
+          "preview_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "track_number": {
+            "type": "number"
+          },
+          "restrictions": {
+            "$ref": "#/components/schemas/Spotify.Object.Restrictions"
+          },
+          "type": {
+            "type": "string",
+            "const": "track"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "album",
+          "artists",
+          "available_markets",
+          "disc_number",
+          "duration_ms",
+          "explicit",
+          "external_ids",
+          "external_urls",
+          "href",
+          "id",
+          "is_local",
+          "name",
+          "popularity",
+          "preview_url",
+          "track_number",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.AuthorizationCodeCredentials": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "expires_in": {
+            "type": "number"
+          },
+          "refresh_token": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "token_type": {
+            "type": "string",
+            "const": "Bearer"
+          }
+        },
+        "required": [
+          "access_token",
+          "expires_in",
+          "refresh_token",
+          "scope",
+          "token_type"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Context": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["artist", "playlist", "album", "show"]
+          },
+          "href": {
+            "type": "string"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": ["type", "href", "external_urls", "uri"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.CurrentlyPlaying": {
+        "type": "object",
+        "properties": {
+          "context": {
+            "$ref": "#/components/schemas/Spotify.Object.Context"
+          },
+          "timestamp": {
+            "type": "number"
+          },
+          "progress_ms": {
+            "type": "number"
+          },
+          "is_playing": {
+            "type": "boolean"
+          },
+          "item": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Spotify.Object.Track"
+              },
+              {
+                "$ref": "#/components/schemas/Spotify.Object.Episode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "currently_playing_type": {
+            "$ref": "#/components/schemas/Spotify.Object.CurrentlyPlayingType"
+          },
+          "actions": {
+            "$ref": "#/components/schemas/Spotify.Object.Actions"
+          }
+        },
+        "required": [
+          "context",
+          "timestamp",
+          "progress_ms",
+          "is_playing",
+          "item",
+          "currently_playing_type",
+          "actions"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Episode": {
+        "type": "object",
+        "properties": {
+          "audio_preview_url": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "duration_ms": {
+            "type": "number"
+          },
+          "explicit": {
+            "type": "boolean"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "html_description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Image"
+            }
+          },
+          "is_externally_hosted": {
+            "type": "boolean"
+          },
+          "is_playable": {
+            "type": "boolean"
+          },
+          "language": {
+            "type": "string",
+            "description": "The language used in the episode, identified by a  {@link  https://en.wikipedia.org/wiki/ISO_639 ISO 639 }  code.",
+            "deprecated": true
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "release_date": {
+            "type": "string"
+          },
+          "release_date_precision": {
+            "$ref": "#/components/schemas/Spotify.Object.ReleaseDatePrecision"
+          },
+          "resume_point": {
+            "$ref": "#/components/schemas/Spotify.Object.ResumePoint"
+          },
+          "show": {
+            "$ref": "#/components/schemas/Spotify.Object.ShowSimplified"
+          },
+          "type": {
+            "type": "string",
+            "const": "episode"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "audio_preview_url",
+          "description",
+          "duration_ms",
+          "explicit",
+          "external_urls",
+          "href",
+          "html_description",
+          "id",
+          "images",
+          "is_externally_hosted",
+          "is_playable",
+          "language",
+          "languages",
+          "name",
+          "release_date",
+          "release_date_precision",
+          "resume_point",
+          "show",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.ResumePoint": {
+        "type": "object",
+        "properties": {
+          "fully_played": {
+            "type": "boolean"
+          },
+          "resume_position_ms": {
+            "type": "number"
+          }
+        },
+        "required": ["fully_played", "resume_position_ms"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.ShowSimplified": {
+        "type": "object",
+        "properties": {
+          "available_markets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.CountryCode"
+            }
+          },
+          "copyrights": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Copyright"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "explicit": {
+            "type": "boolean"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "html_description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Image"
+            }
+          },
+          "is_externally_hosted": {
+            "type": "boolean"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "media_type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "total_episodes": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "const": "show"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "available_markets",
+          "copyrights",
+          "description",
+          "explicit",
+          "external_urls",
+          "href",
+          "html_description",
+          "id",
+          "images",
+          "is_externally_hosted",
+          "languages",
+          "media_type",
+          "name",
+          "publisher",
+          "total_episodes",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.CurrentlyPlayingType": {
+        "type": "string",
+        "enum": ["track", "episode", "ad", "unknown"]
+      },
+      "Spotify.Object.CurrentUser": {
+        "type": "object",
+        "properties": {
+          "country": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "explicit_content": {
+            "$ref": "#/components/schemas/Spotify.Object.ExplicitContentSettings"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "followers": {
+            "$ref": "#/components/schemas/Spotify.Object.Followers"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Image"
+            }
+          },
+          "product": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "const": "user"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "country",
+          "display_name",
+          "email",
+          "explicit_content",
+          "external_urls",
+          "followers",
+          "href",
+          "id",
+          "images",
+          "product",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.ExplicitContentSettings": {
+        "type": "object",
+        "properties": {
+          "filter_enabled": {
+            "type": "boolean"
+          },
+          "filter_locked": {
+            "type": "boolean"
+          }
+        },
+        "required": ["filter_enabled", "filter_locked"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Cursors": {
+        "type": "object",
+        "properties": {
+          "after": {
+            "type": "string"
+          },
+          "before": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Spotify.Object.Device": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "is_private_session": {
+            "type": "boolean"
+          },
+          "is_restricted": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "volume_percent": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "is_active",
+          "is_private_session",
+          "is_restricted",
+          "name",
+          "type",
+          "volume_percent"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.EpisodeSimplified": {
+        "type": "object",
+        "properties": {
+          "audio_preview_url": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "duration_ms": {
+            "type": "number"
+          },
+          "explicit": {
+            "type": "boolean"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "html_description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Image"
+            }
+          },
+          "is_externally_hosted": {
+            "type": "boolean"
+          },
+          "is_playable": {
+            "type": "boolean"
+          },
+          "language": {
+            "type": "string",
+            "description": "The language used in the episode, identified by a  {@link  https://en.wikipedia.org/wiki/ISO_639 ISO 639 }  code.",
+            "deprecated": true
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "release_date": {
+            "type": "string"
+          },
+          "release_date_precision": {
+            "$ref": "#/components/schemas/Spotify.Object.ReleaseDatePrecision"
+          },
+          "resume_point": {
+            "$ref": "#/components/schemas/Spotify.Object.ResumePoint"
+          },
+          "type": {
+            "type": "string",
+            "const": "episode"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "audio_preview_url",
+          "description",
+          "duration_ms",
+          "explicit",
+          "external_urls",
+          "href",
+          "html_description",
+          "id",
+          "images",
+          "is_externally_hosted",
+          "is_playable",
+          "language",
+          "languages",
+          "name",
+          "release_date",
+          "release_date_precision",
+          "resume_point",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.FeaturedPlaylists": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "playlists": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.PlaylistSimplified>"
+          }
+        },
+        "required": ["message", "playlists"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Paginated<Spotify.Object.PlaylistSimplified>": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.PlaylistSimplified"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "offset": {
+            "type": "number"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "href",
+          "limit",
+          "next",
+          "offset",
+          "previous",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.PlaylistSimplified": {
+        "type": "object",
+        "properties": {
+          "collaborative": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Image"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/Spotify.Object.User"
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "snapshot_id": {
+            "type": "string"
+          },
+          "tracks": {
+            "$ref": "#/components/schemas/Spotify.Object.PlaylistTracksInformation"
+          },
+          "type": {
+            "type": "string",
+            "const": "playlist"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "collaborative",
+          "description",
+          "external_urls",
+          "href",
+          "id",
+          "images",
+          "name",
+          "owner",
+          "public",
+          "snapshot_id",
+          "tracks",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.User": {
+        "type": "object",
+        "properties": {
+          "display_name": {
+            "type": "string"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "followers": {
+            "$ref": "#/components/schemas/Spotify.Object.Followers"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Image"
+            }
+          },
+          "type": {
+            "type": "string",
+            "const": "user"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "display_name",
+          "external_urls",
+          "followers",
+          "href",
+          "id",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.PlaylistTracksInformation": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": ["href", "total"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.NewReleases": {
+        "type": "object",
+        "properties": {
+          "albums": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.AlbumSimplified>"
+          }
+        },
+        "required": ["albums"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Paginated<Spotify.Object.AlbumSimplified>": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.AlbumSimplified"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "offset": {
+            "type": "number"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "href",
+          "limit",
+          "next",
+          "offset",
+          "previous",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.PlaybackState": {
+        "type": "object",
+        "properties": {
+          "device": {
+            "$ref": "#/components/schemas/Spotify.Object.Device"
+          },
+          "repeat_state": {
+            "$ref": "#/components/schemas/Spotify.Object.RepeatMode"
+          },
+          "shuffle_state": {
+            "type": "boolean"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Spotify.Object.Context"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "timestamp": {
+            "type": "number"
+          },
+          "progress_ms": {
+            "type": "number"
+          },
+          "is_playing": {
+            "type": "boolean"
+          },
+          "item": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Spotify.Object.Track"
+              },
+              {
+                "$ref": "#/components/schemas/Spotify.Object.Episode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "currently_playing_type": {
+            "$ref": "#/components/schemas/Spotify.Object.CurrentlyPlayingType"
+          },
+          "actions": {
+            "$ref": "#/components/schemas/Spotify.Object.Actions"
+          }
+        },
+        "required": [
+          "device",
+          "repeat_state",
+          "shuffle_state",
+          "context",
+          "timestamp",
+          "progress_ms",
+          "is_playing",
+          "item",
+          "currently_playing_type",
+          "actions"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.RepeatMode": {
+        "type": "string",
+        "enum": ["context", "off", "track"]
+      },
+      "Spotify.Object.PlaybackQueue": {
+        "type": "object",
+        "properties": {
+          "currently_playing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Spotify.Object.Track"
+              },
+              {
+                "$ref": "#/components/schemas/Spotify.Object.Episode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "queue": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Spotify.Object.Track"
+                },
+                {
+                  "$ref": "#/components/schemas/Spotify.Object.Episode"
+                }
+              ]
+            }
+          }
+        },
+        "required": ["currently_playing", "queue"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.PlayHistory": {
+        "type": "object",
+        "properties": {
+          "track": {
+            "$ref": "#/components/schemas/Spotify.Object.TrackSimplified"
+          },
+          "played_at": {
+            "type": "string"
+          },
+          "context": {
+            "$ref": "#/components/schemas/Spotify.Object.Context"
+          }
+        },
+        "required": ["track", "played_at", "context"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Playlist": {
+        "type": "object",
+        "properties": {
+          "collaborative": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "followers": {
+            "$ref": "#/components/schemas/Spotify.Object.Followers"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Image"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/Spotify.Object.UserSimplified"
+          },
+
+          "public": {
+            "type": "boolean"
+          },
+          "snapshot_id": {
+            "type": "string"
+          },
+          "tracks": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.PlaylistTrack>"
+          },
+          "type": {
+            "type": "string",
+            "const": "playlist"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "collaborative",
+          "description",
+          "external_urls",
+          "followers",
+          "href",
+          "id",
+          "images",
+          "name",
+          "owner",
+          "public",
+          "snapshot_id",
+          "tracks",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.UserSimplified": {
+        "type": "object",
+        "properties": {
+          "display_name": {
+            "type": "string"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "const": "user"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": ["external_urls", "href", "id", "type", "uri"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Paginated<Spotify.Object.PlaylistTrack>": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.PlaylistTrack"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "offset": {
+            "type": "number"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "href",
+          "limit",
+          "next",
+          "offset",
+          "previous",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.PlaylistTrack": {
+        "type": "object",
+        "properties": {
+          "added_at": {
+            "type": "string"
+          },
+          "added_by": {
+            "$ref": "#/components/schemas/Spotify.Object.UserSimplified"
+          },
+          "is_local": {
+            "type": "boolean"
+          },
+          "track": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Spotify.Object.PlaylistTrackItem"
+              },
+              {
+                "$ref": "#/components/schemas/Spotify.Object.PlaylistEpisodeItem"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type"
+            }
+          },
+          "video_thumbnail": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "required": ["url"],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "added_at",
+          "added_by",
+          "is_local",
+          "track",
+          "video_thumbnail"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.PlaylistItem": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/Spotify.Object.PlaylistTrackItem"
+          },
+          {
+            "$ref": "#/components/schemas/Spotify.Object.PlaylistEpisodeItem"
+          }
+        ]
+      },
+      "Spotify.Object.PlaylistTrackItem": {
+        "type": "object",
+        "properties": {
+          "album": {
+            "$ref": "#/components/schemas/Spotify.Object.AlbumSimplified"
+          },
+          "artists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.ArtistSimplified"
+            }
+          },
+          "available_markets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.CountryCode"
+            }
+          },
+          "disc_number": {
+            "type": "number"
+          },
+          "duration_ms": {
+            "type": "number"
+          },
+          "episode": {
+            "type": "boolean"
+          },
+          "explicit": {
+            "type": "boolean"
+          },
+          "external_ids": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalId"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "is_local": {
+            "type": "boolean"
+          },
+          "is_playable": {
+            "type": "boolean"
+          },
+          "linked_from": {
+            "$ref": "#/components/schemas/Spotify.Object.Track"
+          },
+          "name": {
+            "type": "string"
+          },
+          "popularity": {
+            "type": "number"
+          },
+          "preview_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "restrictions": {
+            "$ref": "#/components/schemas/Spotify.Object.Restrictions"
+          },
+          "track": {
+            "type": "boolean"
+          },
+          "track_number": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "const": "track"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "album",
+          "artists",
+          "available_markets",
+          "disc_number",
+          "duration_ms",
+          "episode",
+          "explicit",
+          "external_ids",
+          "external_urls",
+          "href",
+          "id",
+          "is_local",
+          "name",
+          "popularity",
+          "preview_url",
+          "track",
+          "track_number",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.PlaylistEpisodeItem": {
+        "type": "object",
+        "properties": {
+          "album": {
+            "$ref": "#/components/schemas/Spotify.Object.PlaylistEpisodeShow"
+          },
+          "artists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.PlaylistEpisodeArtist"
+            }
+          },
+          "available_markets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.CountryCode"
+            }
+          },
+          "disc_number": {
+            "type": "number"
+          },
+          "duration_ms": {
+            "type": "number"
+          },
+          "episode": {
+            "type": "boolean"
+          },
+          "explicit": {
+            "type": "boolean"
+          },
+          "external_ids": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalId"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "is_local": {
+            "type": "boolean"
+          },
+          "is_playable": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "popularity": {
+            "type": "number"
+          },
+          "preview_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "track": {
+            "type": "boolean"
+          },
+          "track_number": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "const": "episode"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "album",
+          "artists",
+          "available_markets",
+          "disc_number",
+          "duration_ms",
+          "episode",
+          "explicit",
+          "external_ids",
+          "external_urls",
+          "href",
+          "id",
+          "is_local",
+          "is_playable",
+          "name",
+          "popularity",
+          "preview_url",
+          "track",
+          "track_number",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.PlaylistEpisodeShow": {
+        "type": "object",
+        "properties": {
+          "album_type": {
+            "$ref": "#/components/schemas/Spotify.Object.AlbumType"
+          },
+          "artists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.PlaylistEpisodeArtist"
+            }
+          },
+          "available_markets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.CountryCode"
+            }
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Image"
+            }
+          },
+          "is_playable": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "release_date": {
+            "type": "string"
+          },
+          "release_date_precision": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Spotify.Object.ReleaseDatePrecision"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "restrictions": {
+            "$ref": "#/components/schemas/Spotify.Object.Restrictions"
+          },
+          "total_tracks": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "const": "show"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "album_type",
+          "artists",
+          "available_markets",
+          "external_urls",
+          "href",
+          "id",
+          "images",
+          "is_playable",
+          "name",
+          "release_date",
+          "release_date_precision",
+          "restrictions",
+          "total_tracks",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.PlaylistEpisodeArtist": {
+        "type": "object",
+        "properties": {
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "const": "show"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": ["external_urls", "href", "id", "name", "type", "uri"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Recommendations": {
+        "type": "object",
+        "properties": {
+          "seeds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.RecommendationSeed"
+            }
+          },
+          "tracks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Track"
+            }
+          }
+        },
+        "required": ["seeds", "tracks"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.RecommendationSeed": {
+        "type": "object",
+        "properties": {
+          "afterFilteringSize": {
+            "type": "number"
+          },
+          "afterRelinkingSize": {
+            "type": "number"
+          },
+          "href": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "initialPoolSize": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["ARTIST", "TRACK", "GENRE"]
+          }
+        },
+        "required": [
+          "afterFilteringSize",
+          "afterRelinkingSize",
+          "href",
+          "id",
+          "initialPoolSize",
+          "type"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.SavedAlbum": {
+        "type": "object",
+        "properties": {
+          "added_at": {
+            "type": "string"
+          },
+          "album": {
+            "$ref": "#/components/schemas/Spotify.Object.Album"
+          }
+        },
+        "required": ["added_at", "album"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.SavedEpisode": {
+        "type": "object",
+        "properties": {
+          "added_at": {
+            "type": "string"
+          },
+          "episode": {
+            "$ref": "#/components/schemas/Spotify.Object.Episode"
+          }
+        },
+        "required": ["added_at", "episode"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.SavedShow": {
+        "type": "object",
+        "properties": {
+          "added_at": {
+            "type": "string"
+          },
+          "show": {
+            "$ref": "#/components/schemas/Spotify.Object.Show"
+          }
+        },
+        "required": ["added_at", "show"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Show": {
+        "type": "object",
+        "properties": {
+          "available_markets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.CountryCode"
+            }
+          },
+          "copyrights": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Copyright"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "episodes": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.EpisodeSimplified>"
+          },
+          "explicit": {
+            "type": "boolean"
+          },
+          "external_urls": {
+            "$ref": "#/components/schemas/Spotify.Object.ExternalUrl"
+          },
+          "href": {
+            "type": "string"
+          },
+          "html_description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Image"
+            }
+          },
+          "is_externally_hosted": {
+            "type": "boolean"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "media_type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "total_episodes": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "const": "show"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "available_markets",
+          "copyrights",
+          "description",
+          "episodes",
+          "explicit",
+          "external_urls",
+          "href",
+          "html_description",
+          "id",
+          "images",
+          "is_externally_hosted",
+          "languages",
+          "media_type",
+          "name",
+          "publisher",
+          "total_episodes",
+          "type",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Paginated<Spotify.Object.EpisodeSimplified>": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.EpisodeSimplified"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "offset": {
+            "type": "number"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "href",
+          "limit",
+          "next",
+          "offset",
+          "previous",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.SavedTrack": {
+        "type": "object",
+        "properties": {
+          "added_at": {
+            "type": "string"
+          },
+          "track": {
+            "$ref": "#/components/schemas/Spotify.Object.Track"
+          }
+        },
+        "required": ["added_at", "track"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.SearchResults": {
+        "type": "object",
+        "properties": {
+          "albums": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.AlbumSimplified>"
+          },
+          "artists": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.Artist>"
+          },
+          "episodes": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.EpisodeSimplified>"
+          },
+          "playlists": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.PlaylistSimplified>"
+          },
+          "tracks": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.Track>"
+          },
+          "shows": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.ShowSimplified>"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Spotify.Object.Snapshot": {
+        "type": "object",
+        "properties": {
+          "snapshot_id": {
+            "type": "string"
+          }
+        }
+      },
+      "Spotify.Object.Paginated<Spotify.Object.Artist>": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Artist"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "offset": {
+            "type": "number"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "href",
+          "limit",
+          "next",
+          "offset",
+          "previous",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Paginated<Spotify.Object.Track>": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Track"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "offset": {
+            "type": "number"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "href",
+          "limit",
+          "next",
+          "offset",
+          "previous",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Paginated<Spotify.Object.ShowSimplified>": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.ShowSimplified"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "offset": {
+            "type": "number"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "href",
+          "limit",
+          "next",
+          "offset",
+          "previous",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.TrackAudioFeatures": {
+        "type": "object",
+        "properties": {
+          "acousticness": {
+            "type": "number"
+          },
+          "analysis_url": {
+            "type": "string"
+          },
+          "danceability": {
+            "type": "number"
+          },
+          "duration_ms": {
+            "type": "number"
+          },
+          "energy": {
+            "type": "number"
+          },
+          "id": {
+            "type": "string"
+          },
+          "instrumentalness": {
+            "type": "number"
+          },
+          "key": {
+            "type": "number"
+          },
+          "liveness": {
+            "type": "number"
+          },
+          "loudness": {
+            "type": "number"
+          },
+          "mode": {
+            "type": "number"
+          },
+          "speechiness": {
+            "type": "number"
+          },
+          "tempo": {
+            "type": "number"
+          },
+          "time_signature": {
+            "type": "number"
+          },
+          "track_href": {
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          },
+          "valence": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "acousticness",
+          "analysis_url",
+          "danceability",
+          "duration_ms",
+          "energy",
+          "id",
+          "instrumentalness",
+          "key",
+          "liveness",
+          "loudness",
+          "mode",
+          "speechiness",
+          "tempo",
+          "time_signature",
+          "track_href",
+          "uri",
+          "valence"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Response.DELETE": {
+        "type": "object",
+        "properties": {
+          "/playlists/:id/tracks": {
+            "type": "object",
+            "properties": {
+              "snapshot_id": {
+                "type": "string"
+              }
+            },
+            "required": ["snapshot_id"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["/playlists/:id/tracks"],
+        "additionalProperties": false
+      },
+      "Spotify.Response.POST": {
+        "type": "object",
+        "properties": {
+          "/playlists/:id/tracks": {
+            "type": "object",
+            "properties": {
+              "snapshot_id": {
+                "type": "string"
+              }
+            },
+            "required": ["snapshot_id"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["/playlists/:id/tracks"],
+        "additionalProperties": false
+      },
+      "Spotify.Response.GET": {
+        "type": "object",
+        "properties": {
+          "/albums": {
+            "$ref": "#/components/schemas/Spotify.Object.List<'albums',Spotify.Object.Album>"
+          },
+          "/albums/:id": {
+            "$ref": "#/components/schemas/Spotify.Object.Album"
+          },
+          "/albums/:id/tracks": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.TrackSimplified>"
+          },
+          "/artists": {
+            "$ref": "#/components/schemas/Spotify.Object.List<'artists',Spotify.Object.Artist>"
+          },
+          "/artists/:id": {
+            "$ref": "#/components/schemas/Spotify.Object.Artist"
+          },
+          "/artists/:id/albums": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.AlbumSimplified>"
+          },
+          "/artists/:id/related-artists": {
+            "$ref": "#/components/schemas/Spotify.Object.List<'artists',Spotify.Object.Artist>"
+          },
+          "/artists/:id/top-tracks": {
+            "$ref": "#/components/schemas/Spotify.Object.ArtistTopTracks"
+          },
+          "/audio-features": {
+            "$ref": "#/components/schemas/Spotify.Object.List<'audio_features',Spotify.Object.TrackAudioFeatures>"
+          },
+          "/audio-features/:id": {
+            "$ref": "#/components/schemas/Spotify.Object.TrackAudioFeatures"
+          },
+          "/authorize": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  }
+                },
+                "required": ["code"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  }
+                },
+                "required": ["error"],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "/api/token": {
+            "$ref": "#/components/schemas/Spotify.Object.AuthorizationCodeCredentials"
+          },
+          "/browse/featured-playlists": {
+            "$ref": "#/components/schemas/Spotify.Object.FeaturedPlaylists"
+          },
+          "/browse/new-releases": {
+            "$ref": "#/components/schemas/Spotify.Object.NewReleases"
+          },
+          "/episodes": {
+            "$ref": "#/components/schemas/Spotify.Object.List<'episodes',Spotify.Object.Episode>"
+          },
+          "/episodes/:id": {
+            "$ref": "#/components/schemas/Spotify.Object.Episode"
+          },
+          "/me": {
+            "$ref": "#/components/schemas/Spotify.Object.CurrentUser"
+          },
+          "/me/albums": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.SavedAlbum>"
+          },
+          "/me/albums/contains": {
+            "type": "array",
+            "items": {
+              "type": "boolean"
+            }
+          },
+          "/me/episodes": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.SavedEpisode>"
+          },
+          "/me/episodes/contains": {
+            "type": "array",
+            "items": {
+              "type": "boolean"
+            }
+          },
+          "/me/following": {
+            "type": "object",
+            "properties": {
+              "artists": {
+                "$ref": "#/components/schemas/Spotify.Object.PaginatedCursorBased<Spotify.Object.Artist>"
+              }
+            },
+            "required": ["artists"],
+            "additionalProperties": false
+          },
+          "/me/following/contains": {
+            "type": "array",
+            "items": {
+              "type": "boolean"
+            }
+          },
+          "/me/player": {
+            "$ref": "#/components/schemas/Spotify.Object.PlaybackState"
+          },
+          "/me/player/currently-playing": {
+            "$ref": "#/components/schemas/Spotify.Object.CurrentlyPlaying"
+          },
+          "/me/player/devices": {
+            "$ref": "#/components/schemas/Spotify.Object.List<'devices',Spotify.Object.Device>"
+          },
+          "/me/player/queue": {
+            "$ref": "#/components/schemas/Spotify.Object.PlaybackQueue"
+          },
+          "/me/player/recently-played": {
+            "$ref": "#/components/schemas/Spotify.Object.PaginatedCursorBased<Spotify.Object.PlayHistory>"
+          },
+          "/me/playlists": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.Playlist>"
+          },
+          "/me/shows": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.SavedShow>"
+          },
+          "/me/shows/contains": {
+            "type": "array",
+            "items": {
+              "type": "boolean"
+            }
+          },
+          "/me/top/artists": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.Artist>"
+          },
+          "/me/top/tracks": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.Track>"
+          },
+          "/me/tracks": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.SavedTrack>"
+          },
+          "/me/tracks/contains": {
+            "type": "array",
+            "items": {
+              "type": "boolean"
+            }
+          },
+          "/playlists/:id": {
+            "$ref": "#/components/schemas/Spotify.Object.Playlist"
+          },
+          "/playlists/:id/followers/contains": {
+            "type": "array",
+            "items": {
+              "type": "boolean"
+            }
+          },
+          "/playlists/:id/tracks": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.PlaylistTrack>"
+          },
+          "/recommendations": {
+            "$ref": "#/components/schemas/Spotify.Object.Recommendations"
+          },
+          "/recommendations/available-genre-seeds": {
+            "$ref": "#/components/schemas/Spotify.Object.List<'genres',string>"
+          },
+          "/search": {
+            "$ref": "#/components/schemas/Spotify.Object.SearchResults"
+          },
+          "/shows": {
+            "$ref": "#/components/schemas/Spotify.Object.List<'shows',Spotify.Object.Show>"
+          },
+          "/shows/:id": {
+            "$ref": "#/components/schemas/Spotify.Object.Show"
+          },
+          "/shows/:id/episodes": {
+            "$ref": "#/components/schemas/Spotify.Object.Paginated<Spotify.Object.EpisodeSimplified>"
+          },
+          "/tracks": {
+            "$ref": "#/components/schemas/Spotify.Object.List<'tracks',Spotify.Object.Track>"
+          },
+          "/tracks/:id": {
+            "$ref": "#/components/schemas/Spotify.Object.Track"
+          },
+          "/users/:id": {
+            "$ref": "#/components/schemas/Spotify.Object.User"
+          }
+        },
+        "required": [
+          "/albums",
+          "/albums/:id",
+          "/albums/:id/tracks",
+          "/artists",
+          "/artists/:id",
+          "/artists/:id/albums",
+          "/artists/:id/related-artists",
+          "/artists/:id/top-tracks",
+          "/audio-features",
+          "/audio-features/:id",
+          "/authorize",
+          "/api/token",
+          "/browse/featured-playlists",
+          "/browse/new-releases",
+          "/episodes",
+          "/episodes/:id",
+          "/me",
+          "/me/albums",
+          "/me/albums/contains",
+          "/me/episodes",
+          "/me/episodes/contains",
+          "/me/following",
+          "/me/following/contains",
+          "/me/player",
+          "/me/player/currently-playing",
+          "/me/player/devices",
+          "/me/player/queue",
+          "/me/player/recently-played",
+          "/me/playlists",
+          "/me/shows",
+          "/me/shows/contains",
+          "/me/top/artists",
+          "/me/top/tracks",
+          "/me/tracks",
+          "/me/tracks/contains",
+          "/playlists/:id",
+          "/playlists/:id/followers/contains",
+          "/playlists/:id/tracks",
+          "/recommendations",
+          "/recommendations/available-genre-seeds",
+          "/search",
+          "/shows",
+          "/shows/:id",
+          "/shows/:id/episodes",
+          "/tracks",
+          "/tracks/:id",
+          "/users/:id"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.List<'albums',Spotify.Object.Album>": {
+        "type": "object",
+        "properties": {
+          "albums": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Album"
+            }
+          }
+        },
+        "required": ["albums"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.List<'artists',Spotify.Object.Artist>": {
+        "type": "object",
+        "properties": {
+          "artists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Artist"
+            }
+          }
+        },
+        "required": ["artists"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.List<'audio_features',Spotify.Object.TrackAudioFeatures>": {
+        "type": "object",
+        "properties": {
+          "audio_features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.TrackAudioFeatures"
+            }
+          }
+        },
+        "required": ["audio_features"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.List<'episodes',Spotify.Object.Episode>": {
+        "type": "object",
+        "properties": {
+          "episodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Episode"
+            }
+          }
+        },
+        "required": ["episodes"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Paginated<Spotify.Object.SavedAlbum>": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.SavedAlbum"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "offset": {
+            "type": "number"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "href",
+          "limit",
+          "next",
+          "offset",
+          "previous",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Paginated<Spotify.Object.SavedEpisode>": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.SavedEpisode"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "offset": {
+            "type": "number"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "href",
+          "limit",
+          "next",
+          "offset",
+          "previous",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.PaginatedCursorBased<Spotify.Object.Artist>": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Artist"
+            }
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "cursors": {
+            "$ref": "#/components/schemas/Spotify.Object.Cursors"
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": ["href", "items", "limit", "next", "cursors", "total"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.List<'devices',Spotify.Object.Device>": {
+        "type": "object",
+        "properties": {
+          "devices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Device"
+            }
+          }
+        },
+        "required": ["devices"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.PaginatedCursorBased<Spotify.Object.PlayHistory>": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.PlayHistory"
+            }
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "cursors": {
+            "$ref": "#/components/schemas/Spotify.Object.Cursors"
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": ["href", "items", "limit", "next", "cursors", "total"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Paginated<Spotify.Object.Playlist>": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Playlist"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "offset": {
+            "type": "number"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "href",
+          "limit",
+          "next",
+          "offset",
+          "previous",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Paginated<Spotify.Object.SavedShow>": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.SavedShow"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "offset": {
+            "type": "number"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "href",
+          "limit",
+          "next",
+          "offset",
+          "previous",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.Paginated<Spotify.Object.SavedTrack>": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.SavedTrack"
+            }
+          },
+          "href": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "offset": {
+            "type": "number"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "href",
+          "limit",
+          "next",
+          "offset",
+          "previous",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Object.List<'genres',string>": {
+        "type": "object",
+        "properties": {
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["genres"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.List<'shows',Spotify.Object.Show>": {
+        "type": "object",
+        "properties": {
+          "shows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Show"
+            }
+          }
+        },
+        "required": ["shows"],
+        "additionalProperties": false
+      },
+      "Spotify.Object.List<'tracks',Spotify.Object.Track>": {
+        "type": "object",
+        "properties": {
+          "tracks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Spotify.Object.Track"
+            }
+          }
+        },
+        "required": ["tracks"],
+        "additionalProperties": false
+      },
+      "Spotify.Request.Paths": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/Spotify.Request.BodyParams.Paths"
+          },
+          {
+            "$ref": "#/components/schemas/Spotify.Request.QueryParams.Paths"
+          }
+        ]
+      },
+      "Spotify.Request.BodyParams.Paths": {
+        "type": "string",
+        "enum": [
+          "/playlists/:id/tracks",
+          "/me/albums",
+          "/me/episodes",
+          "/me/following",
+          "/me/player",
+          "/me/player/play",
+          "/playlists/:id/followers",
+          "/me/tracks"
+        ]
+      },
+      "Spotify.Request.QueryParams.Paths": {
+        "type": "string",
+        "enum": [
+          "/me/albums",
+          "/me/episodes",
+          "/me/following",
+          "/me/shows",
+          "/me/tracks",
+          "/albums",
+          "/albums/:id",
+          "/albums/:id/tracks",
+          "/artists",
+          "/artists/:id/albums",
+          "/artists/:id/top-tracks",
+          "/audio-features",
+          "/browse/featured-playlists",
+          "/browse/new-releases",
+          "/episodes",
+          "/recommendations",
+          "/me/albums/contains",
+          "/me/episodes/contains",
+          "/me/following/contains",
+          "/me/shows/contains",
+          "/me/top/artists",
+          "/me/top/tracks",
+          "/me/tracks/contains",
+          "/me/player",
+          "/me/player/currently-playing",
+          "/me/player/recently-played",
+          "/me/playlists",
+          "/playlists/:id/followers/contains",
+          "/playlists/:id/tracks",
+          "/playlists/:id",
+          "/search",
+          "/shows",
+          "/shows/:id/episodes",
+          "/tracks",
+          "/tracks/:id",
+          "/me/player/pause",
+          "/me/player/play",
+          "/me/player/repeat",
+          "/me/player/seek",
+          "/me/player/shuffle",
+          "/me/player/volume",
+          "/me/player/next",
+          "/me/player/previous",
+          "/me/player/queue"
+        ]
+      },
+      "Spotify.Request.BodyParams.DELETE": {
+        "type": "object",
+        "properties": {
+          "/me/albums": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/episodes": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/following": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/tracks": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "/playlists/:id/tracks": {
+            "type": "object",
+            "properties": {
+              "snapshot_id": {
+                "type": "string"
+              },
+              "tracks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "uri": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["uri"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["tracks"],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "/me/albums",
+          "/me/episodes",
+          "/me/following",
+          "/me/tracks",
+          "/playlists/:id/tracks"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Request.BodyParams.POST": {
+        "type": "object",
+        "properties": {
+          "/playlists/:id/tracks": {
+            "type": "object",
+            "properties": {
+              "uris": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "position": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": ["/playlists/:id/tracks"],
+        "additionalProperties": false
+      },
+      "Spotify.Request.BodyParams.PUT": {
+        "type": "object",
+        "properties": {
+          "/me/albums": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/episodes": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/following": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/player": {
+            "type": "object",
+            "properties": {
+              "device_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "play": {
+                "type": "boolean"
+              }
+            },
+            "required": ["device_ids"],
+            "additionalProperties": false
+          },
+          "/me/player/play": {
+            "type": "object",
+            "properties": {
+              "context_uri": {
+                "type": "string"
+              },
+              "uris": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "offset": {
+                "type": "object",
+                "properties": {
+                  "position": {
+                    "type": "number"
+                  },
+                  "uri": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "position_ms": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/playlists/:id/followers": {
+            "type": "object",
+            "properties": {
+              "public": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "/me/albums",
+          "/me/episodes",
+          "/me/following",
+          "/me/player",
+          "/me/player/play",
+          "/playlists/:id/followers"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Request.QueryParams.DELETE": {
+        "type": "object",
+        "properties": {
+          "/me/albums": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/me/episodes": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/me/following": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["artist", "user"]
+              }
+            },
+            "required": ["ids", "type"],
+            "additionalProperties": false
+          },
+          "/me/shows": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              },
+              "market": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/me/tracks": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "/me/albums",
+          "/me/episodes",
+          "/me/following",
+          "/me/shows",
+          "/me/tracks"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Request.QueryParams.GET": {
+        "type": "object",
+        "properties": {
+          "/albums": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              },
+              "market": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/albums/:id": {
+            "type": "object",
+            "properties": {
+              "market": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/albums/:id/tracks": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              },
+              "market": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/artists": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/artists/:id/albums": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              },
+              "include_groups": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/artists/:id/top-tracks": {
+            "type": "object",
+            "properties": {
+              "market": {
+                "type": "string"
+              }
+            },
+            "required": ["market"],
+            "additionalProperties": false
+          },
+          "/audio-features": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/browse/featured-playlists": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              },
+              "timestamp": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/browse/new-releases": {
+            "type": "object",
+            "properties": {
+              "country": {
+                "type": "string"
+              },
+              "limit": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/episodes": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              },
+              "market": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/recommendations": {
+            "type": "object",
+            "properties": {
+              "seed_artists": {
+                "type": "string"
+              },
+              "seed_genres": {
+                "type": "string"
+              },
+              "seed_tracks": {
+                "type": "string"
+              },
+              "limit": {
+                "type": "number"
+              },
+              "max_acousticness": {
+                "type": "number"
+              },
+              "max_danceability": {
+                "type": "number"
+              },
+              "max_duration_ms": {
+                "type": "number"
+              },
+              "max_energy": {
+                "type": "number"
+              },
+              "max_instrumentalness": {
+                "type": "number"
+              },
+              "max_key": {
+                "type": "number"
+              },
+              "max_liveness": {
+                "type": "number"
+              },
+              "max_loudness": {
+                "type": "number"
+              },
+              "max_mode": {
+                "type": "number"
+              },
+              "max_popularity": {
+                "type": "number"
+              },
+              "max_speechiness": {
+                "type": "number"
+              },
+              "max_tempo": {
+                "type": "number"
+              },
+              "max_time_signature": {
+                "type": "number"
+              },
+              "max_valence": {
+                "type": "number"
+              },
+              "min_acousticness": {
+                "type": "number"
+              },
+              "min_danceability": {
+                "type": "number"
+              },
+              "min_duration_ms": {
+                "type": "number"
+              },
+              "min_energy": {
+                "type": "number"
+              },
+              "min_instrumentalness": {
+                "type": "number"
+              },
+              "min_key": {
+                "type": "number"
+              },
+              "min_liveness": {
+                "type": "number"
+              },
+              "min_loudness": {
+                "type": "number"
+              },
+              "min_mode": {
+                "type": "number"
+              },
+              "min_popularity": {
+                "type": "number"
+              },
+              "min_speechiness": {
+                "type": "number"
+              },
+              "min_tempo": {
+                "type": "number"
+              },
+              "min_time_signature": {
+                "type": "number"
+              },
+              "min_valence": {
+                "type": "number"
+              },
+              "target_acousticness": {
+                "type": "number"
+              },
+              "target_danceability": {
+                "type": "number"
+              },
+              "target_duration_ms": {
+                "type": "number"
+              },
+              "target_energy": {
+                "type": "number"
+              },
+              "target_instrumentalness": {
+                "type": "number"
+              },
+              "target_key": {
+                "type": "number"
+              },
+              "target_liveness": {
+                "type": "number"
+              },
+              "target_loudness": {
+                "type": "number"
+              },
+              "target_mode": {
+                "type": "number"
+              },
+              "target_popularity": {
+                "type": "number"
+              },
+              "target_speechiness": {
+                "type": "number"
+              },
+              "target_tempo": {
+                "type": "number"
+              },
+              "target_time_signature": {
+                "type": "number"
+              },
+              "target_valence": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/albums": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/albums/contains": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/me/episodes": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              },
+              "market": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/episodes/contains": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/me/following": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "artist"
+              },
+              "after": {
+                "type": "string"
+              },
+              "limit": {
+                "type": "number"
+              }
+            },
+            "required": ["type"],
+            "additionalProperties": false
+          },
+          "/me/following/contains": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["artist", "user"]
+              }
+            },
+            "required": ["ids", "type"],
+            "additionalProperties": false
+          },
+          "/me/shows": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/shows/contains": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/me/top/artists": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              },
+              "time_range": {
+                "type": "string",
+                "enum": ["long_term", "medium_term", "short_term"]
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/top/tracks": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              },
+              "time_range": {
+                "type": "string",
+                "enum": ["long_term", "medium_term", "short_term"]
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/tracks/contains": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/me/player": {
+            "type": "object",
+            "properties": {
+              "additional_types": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/player/currently-playing": {
+            "type": "object",
+            "properties": {
+              "additional_types": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/player/recently-played": {
+            "type": "object",
+            "properties": {
+              "after": {
+                "type": "number"
+              },
+              "before": {
+                "type": "number"
+              },
+              "limit": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/playlists": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/tracks": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/playlists/:id/followers/contains": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/playlists/:id/tracks": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/playlists/:id": {
+            "type": "object",
+            "properties": {
+              "additional_types": {
+                "type": "string"
+              },
+              "fields": {
+                "type": "string"
+              },
+              "market": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/search": {
+            "type": "object",
+            "properties": {
+              "q": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "include_external": {
+                "type": "string",
+                "const": "audio"
+              },
+              "limit": {
+                "type": "number"
+              },
+              "market": {
+                "type": "string"
+              },
+              "offset": {
+                "type": "number"
+              }
+            },
+            "required": ["q", "type"],
+            "additionalProperties": false
+          },
+          "/shows": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              },
+              "market": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/shows/:id/episodes": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number"
+              },
+              "offset": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/tracks": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              },
+              "market": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/tracks/:id": {
+            "type": "object",
+            "properties": {
+              "market": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "/albums",
+          "/albums/:id",
+          "/albums/:id/tracks",
+          "/artists",
+          "/artists/:id/albums",
+          "/artists/:id/top-tracks",
+          "/audio-features",
+          "/browse/featured-playlists",
+          "/browse/new-releases",
+          "/episodes",
+          "/recommendations",
+          "/me/albums",
+          "/me/albums/contains",
+          "/me/episodes",
+          "/me/episodes/contains",
+          "/me/following",
+          "/me/following/contains",
+          "/me/shows",
+          "/me/shows/contains",
+          "/me/top/artists",
+          "/me/top/tracks",
+          "/me/tracks/contains",
+          "/me/player",
+          "/me/player/currently-playing",
+          "/me/player/recently-played",
+          "/me/playlists",
+          "/me/tracks",
+          "/playlists/:id/followers/contains",
+          "/playlists/:id/tracks",
+          "/playlists/:id",
+          "/search",
+          "/shows",
+          "/shows/:id/episodes",
+          "/tracks",
+          "/tracks/:id"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Request.QueryParams.POST": {
+        "type": "object",
+        "properties": {
+          "/me/player/next": {
+            "type": "object",
+            "properties": {
+              "device_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/player/previous": {
+            "type": "object",
+            "properties": {
+              "device_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/player/queue": {
+            "type": "object",
+            "properties": {
+              "uri": {
+                "type": "string"
+              },
+              "device_id": {
+                "type": "string"
+              }
+            },
+            "required": ["uri"],
+            "additionalProperties": false
+          },
+          "/playlists/:id/tracks": {
+            "type": "object",
+            "properties": {
+              "position": {
+                "type": "number"
+              },
+              "uris": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "/me/player/next",
+          "/me/player/previous",
+          "/me/player/queue",
+          "/playlists/:id/tracks"
+        ],
+        "additionalProperties": false
+      },
+      "Spotify.Request.QueryParams.PUT": {
+        "type": "object",
+        "properties": {
+          "/me/albums": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/me/episodes": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/me/following": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["artist", "user"]
+              }
+            },
+            "required": ["ids", "type"],
+            "additionalProperties": false
+          },
+          "/me/player/pause": {
+            "type": "object",
+            "properties": {
+              "device_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/player/play": {
+            "type": "object",
+            "properties": {
+              "device_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "/me/player/repeat": {
+            "type": "object",
+            "properties": {
+              "state": {
+                "$ref": "#/components/schemas/Spotify.Object.RepeatMode"
+              },
+              "device_id": {
+                "type": "string"
+              }
+            },
+            "required": ["state"],
+            "additionalProperties": false
+          },
+          "/me/player/seek": {
+            "type": "object",
+            "properties": {
+              "position_ms": {
+                "type": "number"
+              },
+              "device_id": {
+                "type": "string"
+              }
+            },
+            "required": ["position_ms"],
+            "additionalProperties": false
+          },
+          "/me/player/shuffle": {
+            "type": "object",
+            "properties": {
+              "state": {
+                "type": "boolean"
+              },
+              "device_id": {
+                "type": "string"
+              }
+            },
+            "required": ["state"],
+            "additionalProperties": false
+          },
+          "/me/player/volume": {
+            "type": "object",
+            "properties": {
+              "volume_percent": {
+                "type": "number"
+              },
+              "device_id": {
+                "type": "string"
+              }
+            },
+            "required": ["volume_percent"],
+            "additionalProperties": false
+          },
+          "/me/shows": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          },
+          "/me/tracks": {
+            "type": "object",
+            "properties": {
+              "ids": {
+                "type": "string"
+              }
+            },
+            "required": ["ids"],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "/me/albums",
+          "/me/episodes",
+          "/me/following",
+          "/me/player/pause",
+          "/me/player/play",
+          "/me/player/repeat",
+          "/me/player/seek",
+          "/me/player/shuffle",
+          "/me/player/volume",
+          "/me/shows",
+          "/me/tracks"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "responses": {
+      "NotFound": {
+        "description": "The requested resource cannot be found.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": ["error"],
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
