@@ -26,8 +26,8 @@ rover template use -t subgraph-python-strawberry-fastapi
 You can now run the following commands to get started:
 
 ```bash
-python -m venv .virtualenv
-source .virtualenv/bin/activate
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt -r requirements-dev.txt
 ```
 
