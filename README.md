@@ -1,29 +1,12 @@
-# Strawberry GraphQL Subgraph Template
+# (Odyssey Course) Intro to GraphQL with Python & Strawberry
 
-This template can be used to quickly create an [Apollo Federation] subgraph with
-[Strawberry GraphQL].
+Welcome to the starter code for **Intro to GraphQL with Python & Strawberry**. You can find the [course lessons and instructions](https://apollographql.com/tutorials/intro-strawberry) on Odyssey, [Apollo](https://apollographql.com)'s learning platform.
 
-## Getting started
+## How to use this repo
 
-To get started, install [rover] and then run the following commands:
+The course will walk you step by step on what to do. This codebase is the starting point of your journey!
 
-```shell
-rover template use -t subgraph-python-strawberry-fastapi
-```
-
-## What's included
-
-- A basic, [Apollo Federation] subgraph with simple examples for queries,
-  entities, and mutations.
-- Example tests in the `tests` directory.
-- GitHub Actions workflows which will:
-  - Run `pytest` on every push.
-  - Check the schema against Apollo Studio on every push.
-  - Publish the subgraph to Apollo Studio on every push to the `main` branch.
-
-## Next Steps
-
-You can now run the following commands to get started:
+This project uses Python. In order to build the project locally, run:
 
 ```bash
 python -m venv .venv
@@ -31,33 +14,18 @@ source .venv/bin/activate
 pip install -r requirements.txt -r requirements-dev.txt
 ```
 
-### Running the server
-
-To run the server, run:
+To start the server, from the root directory, run:
 
 ```bash
 uvicorn main:app --reload
 ```
 
-### Apollo Studio Configuration
+Right now, the server returns a simple "Hello World" message from `http://localhost:8000`.
 
-The GitHub actions for this template are configured to publish the subgraph to Apollo Studio. But they are disabled by default. To enable them, you'll need to add the following secrets to your repository:
+The `final` branch of this repo contains the final stage of the course, with all of the steps and code completed! If you get stuck, you can refer to it and compare your code.
 
-- `APOLLO_KEY`: An Apollo Studio API key for the supergraph to enable schema
-  checks and publishing of the subgraph.
-- `APOLLO_GRAPH_REF`: The name of the graph in Apollo Studio to publish the
-  subgraph to. This should be in the format `graph-name@variant-name`.
-- `PRODUCTION_URL`: The URL of the deployed subgraph that the supergraph gateway
-  will route to.
-- `SUBGRAPH_NAME`: The name of the subgraph in Apollo Studio.
+## Getting Help
 
-And remove the `if: false` from the `publish` step in the `publish-schema.yml`
-and `check-schema.yml` workflows.
+This repo is _not regularly monitored_.
 
-### Subgraph security
-
-Typically, you do not want to allow the public to query your subgraph. To configure the subgraph to only accept requests from your Router, send the `Router-Authorization` header [from your Cloud router](https://www.apollographql.com/docs/graphos/routing/cloud-configuration#managing-secrets) and set the `ROUTER_SECRET` environment variable wherever you deploy this to.
-
-[apollo federation]: https://www.apollographql.com/docs/federation/
-[strawberry graphql]: https://strawberry.rocks/
-[rover]: https://www.apollographql.com/docs/rover/getting-started
+For any issues or problems concerning the course content, please refer to the [Odyssey topic in our community forums](https://community.apollographql.com/tags/c/help/6/odyssey). You can also [join the Apollo Discord](https://discord.gg/graphos).
