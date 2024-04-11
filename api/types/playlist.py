@@ -1,4 +1,5 @@
 import strawberry
+from .track import Track
 
 
 @strawberry.type(
@@ -10,3 +11,4 @@ class Playlist:
     description: str | None = strawberry.field(
         description="Describes the playlist, what to expect and entices the user to listen."
     )
+    tracks: list[Track] = strawberry.field(description="The playlist's tracks.")
