@@ -37,7 +37,7 @@ class Query:
             id=strawberry.ID(data.id),
             name=data.name,
             description=data.description,
-            tracks=[
+            _tracks=[
                 Track(
                     id=strawberry.ID(item.track.id),
                     name=item.track.name,
