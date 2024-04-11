@@ -1,5 +1,6 @@
 import strawberry
 from mock_spotify_rest_api_client.api.playlists import get_featured_playlists
+from mock_spotify_rest_api_client.api.playlists import get_playlist
 from .types.playlist import Playlist
 
 
@@ -19,3 +20,20 @@ class Query:
             )
             for playlist in data.playlists.items
         ]
+
+    @strawberry.field(description="Retrieves a specific playlist.")
+    async def playlist(
+        self, id: strawberry.ID, info: strawberry.Info
+    ) -> Playlist | None:
+        spotify_client = info.context["spotify_client"]
+
+        data = await get_playlist.asyncio(client=spotify_client, playlist_id=id)
+
+        if data is None:
+            return None
+
+        return Playlist(
+            id=strawberry.ID(data.id),
+            name=data.name,
+            description=data.description,
+        )
